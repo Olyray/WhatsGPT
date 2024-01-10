@@ -14,6 +14,10 @@ const twilioClient = twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_A
 // Setup OpenAI
 const openai = new OpenAI(process.env.OPENAI_API_KEY);
 
+app.get('/', (req, res) => {
+    res.send('WhatsGPT is running');
+});
+
 // Endpoint that Twilio will post to
 app.post('/message', async (req, res) => {
     const incomingMsg = req.body.Body;
