@@ -7,6 +7,7 @@ const twilio = require('twilio');
 // Initialize Express and middleware
 const app = express();
 app.use(bodyParser.urlencoded({ extended: true }));
+const PORT = process.env.PORT || 3000;
 
 // Setup Twilio Client
 const twilioClient = twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN);
@@ -48,4 +49,4 @@ app.post('/message', async (req, res) => {
 });
 
 // Start the server
-app.listen(3000, () => console.log('Server is running on port 3000'));
+app.listen(PORT, () => console.log(`Server is running on port ${PORT}`));
