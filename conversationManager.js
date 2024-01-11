@@ -1,6 +1,6 @@
 require('dotenv').config();
 const { Pool } = require('pg');
-const openai = require('openai');
+const { OpenAI } = require('openai');
 const { encoding_for_model } = require('@dqbd/tiktoken');
 
 const pool = new Pool({
@@ -12,10 +12,12 @@ const pool = new Pool({
     port: 5432,
 });
 
+const openai = new OpenAI(process.env.OPENAI_API_KEY);
+
 async function initializeDatabase() {
     const createTableText = `
         CREATE TABLE IF NOT EXISTS user_conversations (
-            whatsapp_number VARCHAR(15) PRIMARY KEY,
+            whatsapp_number VARCHAR(30) PRIMARY KEY,
             conversation_history TEXT
         );
     `;
@@ -40,7 +42,8 @@ async function getConversationHistory(whatsappNumber) {
 
 async function updateConversationHistory(whatsappNumber, conversationHistory) {
     const tokenCount = await countTokens(JSON.stringify(conversationHistory));
-    if (tokenCount > 2000) {
+    console.log(tokenCount);
+    if (tokenCount >= 2000) {
         conversationHistory = await summarizeConversation(conversationHistory);
     }
     try{
@@ -55,10 +58,11 @@ async function summarizeConversation(conversationHistory) {
     const conversationText = conversationHistory.map(msg => `${msg.role}: ${msg.content}`).join('\n');
     const summaryResponse = await openai.chat.completions.create({
         model: "gpt-3.5-turbo",
-        messages: "Summarize the following conversation in not more than 150 words:\n\n" + conversationText,
+        messages: [{ role: "user", content: "Summarize the following conversation in not more than 100 words:\n\n" + conversationText }],
     });
 
-    return summaryResponse.choices[0].message.content;
+    const context = summaryResponse.choices[0].message.content;
+    return [{ role: 'system', content: context }]
 }
 
 async function countTokens(text) {

@@ -38,7 +38,6 @@ app.post('/message', async (req, res) => {
 
         // Add the incoming message to the conversation history
         conversationHistory.push({ role: "user", content: incomingMsg });
-        console.log(conversationHistory);
 
         // Send the message to OpenAI API
         const openaiResponse = await openai.chat.completions.create({
