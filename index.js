@@ -41,9 +41,15 @@ app.post('/message', async (req, res) => {
 
         // Send the message to OpenAI API
         const openaiResponse = await openai.chat.completions.create({
-          messages: conversationHistory,
+          messages: [{
+            role: "system", 
+            content: "You're a knowledgeable friend that your acquintances turn to for help. Your response should be brief. Use a single sentence if possible."
+        }, 
+        ...conversationHistory],
           model: "gpt-3.5-turbo",
       });
+
+      console.log(conversationHistory);
 
         // Extract the text from the OpenAI response
         const message = openaiResponse.choices[0].message.content;

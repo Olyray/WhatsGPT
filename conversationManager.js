@@ -5,11 +5,15 @@ const { encoding_for_model } = require('@dqbd/tiktoken');
 
 const pool = new Pool({
     // PostgreSQL connection settings
-    user: 'postgres',
+    /*user: 'postgres',
     host: 'localhost',
     database: 'olyray',
     password: process.env.DATABASE_PASSWORD,
-    port: 5432,
+    port: 5432,*/
+    connectionString: process.env.DATABASE_URL,
+    ssl: {
+      rejectUnauthorized: false
+    }
 });
 
 const openai = new OpenAI(process.env.OPENAI_API_KEY);
