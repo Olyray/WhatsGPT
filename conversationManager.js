@@ -3,6 +3,7 @@ const { Pool } = require('pg');
 const { OpenAI } = require('openai');
 const { encoding_for_model } = require('@dqbd/tiktoken');
 
+// Connect to the database
 const pool = new Pool({
     // PostgreSQL connection settings
     /*user: 'postgres',
@@ -18,6 +19,7 @@ const pool = new Pool({
 
 const openai = new OpenAI(process.env.OPENAI_API_KEY);
 
+// Initialise the database
 async function initializeDatabase() {
     const createTableText = `
         CREATE TABLE IF NOT EXISTS user_conversations (
@@ -34,6 +36,7 @@ async function initializeDatabase() {
     }
 }
 
+// Get the conversation history
 async function getConversationHistory(whatsappNumber) {
     const res = await pool.query('SELECT conversation_history FROM user_conversations WHERE whatsapp_number = $1', [whatsappNumber]);
 
@@ -44,12 +47,15 @@ async function getConversationHistory(whatsappNumber) {
     return JSON.parse(res.rows[0].conversation_history);
 }
 
+// Update the conversation history 
 async function updateConversationHistory(whatsappNumber, conversationHistory) {
+    // Summarise the conversation if it's more than 2000 tokens
     const tokenCount = await countTokens(JSON.stringify(conversationHistory));
-    console.log(tokenCount);
     if (tokenCount >= 2000) {
         conversationHistory = await summarizeConversation(conversationHistory);
     }
+
+    // Update the conversation history
     try{
       const conversationHistoryString = JSON.stringify(conversationHistory);
       await pool.query('INSERT INTO user_conversations (whatsapp_number, conversation_history) VALUES ($1, $2) ON CONFLICT (whatsapp_number) DO UPDATE SET conversation_history = EXCLUDED.conversation_history', [whatsappNumber, conversationHistoryString]);
@@ -58,6 +64,7 @@ async function updateConversationHistory(whatsappNumber, conversationHistory) {
     }
   }
 
+  // Summarise the conversation
 async function summarizeConversation(conversationHistory) {
     const conversationText = conversationHistory.map(msg => `${msg.role}: ${msg.content}`).join('\n');
     const summaryResponse = await openai.chat.completions.create({
@@ -69,6 +76,7 @@ async function summarizeConversation(conversationHistory) {
     return [{ role: 'system', content: context }]
 }
 
+// Count the tokens
 async function countTokens(text) {
     try {
         const encoder = encoding_for_model('gpt-3.5-turbo');
