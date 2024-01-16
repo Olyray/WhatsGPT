@@ -8,6 +8,7 @@ const {
     getConversationHistory,
     updateConversationHistory
 } = require('./conversationManager');
+const { ModelBuildListInstance } = require('twilio/lib/rest/autopilot/v1/assistant/modelBuild');
 
 // Initialize Express and middleware
 const app = express();
@@ -73,5 +74,9 @@ app.post('/message', async (req, res) => {
     }
 });
 
+module.exports = app;
+
 // Start the server
-app.listen(PORT, () => console.log(`Server is running on port ${PORT}`));
+if (require.main === module) {
+    app.listen(PORT, () => console.log(`Server is running on port ${PORT}`));
+}
