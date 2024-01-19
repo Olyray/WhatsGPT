@@ -1,6 +1,6 @@
 require('dotenv').config();
 const { Pool } = require('pg');
-const { OpenAI } = require('openai');
+const OpenAI  = require('openai');
 const { encoding_for_model } = require('@dqbd/tiktoken');
 
 // Connect to the database

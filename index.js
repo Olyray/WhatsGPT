@@ -1,14 +1,13 @@
 require('dotenv').config();
 const express = require('express');
 const bodyParser = require('body-parser');
-const { OpenAI } = require("openai");
+const OpenAI = require("openai");
 const twilio = require('twilio');
 const {
     initializeDatabase,
     getConversationHistory,
     updateConversationHistory
 } = require('./conversationManager');
-const { ModelBuildListInstance } = require('twilio/lib/rest/autopilot/v1/assistant/modelBuild');
 
 // Initialize Express and middleware
 const app = express();
@@ -49,8 +48,6 @@ app.post('/message', async (req, res) => {
         ...conversationHistory],
           model: "gpt-3.5-turbo",
       });
-
-      console.log(conversationHistory);
 
         // Extract the text from the OpenAI response
         const message = openaiResponse.choices[0].message.content;
